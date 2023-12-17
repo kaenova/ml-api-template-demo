@@ -5,16 +5,16 @@ WORKDIR /workspace
 # Karena kita tidak commit file model dan hanya akan di download, maka
 # kita harus download secara manual
 RUN apt-get update -y
-RUN apt-get install -y wget
+RUN apt-get install -y curl unzip
 
 # Text Model (saved model that is still in zip)
-RUN wget https://huggingface.co/kaenova/simple-model-demo/resolve/main/text.zip?download=true
+RUN curl -L -o text.zip https://huggingface.co/kaenova/simple-model-demo/resolve/main/text.zip?download=true
 RUN unzip text.zip
 # Delete unused model zip file (already extracted)
-RUN rm text.zip
+RUN rm ./text.zip
 
 # Vision model (h5 model)
-RUN wget https://huggingface.co/kaenova/simple-model-demo/resolve/main/vision.h5?download=true
+RUN curl -L -o vision.h5 https://huggingface.co/kaenova/simple-model-demo/resolve/main/vision.h5?download=true
 
 COPY requirements.txt requirements.txt
 
