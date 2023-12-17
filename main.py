@@ -1,3 +1,8 @@
+# Disabling GPU
+# Currently my laptop has buggy version of CUDA
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 # README
 # Hello everyone, in here I (Kaenova | Bangkit Mentor ML-20) 
 # will give you some headstart on createing ML API. 
@@ -45,14 +50,16 @@ import numpy as np
 from pydantic import BaseModel
 from urllib.request import Request
 from fastapi import FastAPI, Response, UploadFile
-from utils import load_image_into_numpy_array
+from utils import load_image_into_numpy_array, resize_and_convert_to_bw
+
+from PIL import Image
 
 # Initialize Model
 # If you already put yout model in the same folder as this main.py
 # You can load .h5 model or any model below this line
 
 # If you use h5 type uncomment line below
-# model = tf.keras.models.load_model('./my_model.h5')
+vision_model = tf.keras.models.load_model('./vision.h5')
 # If you use saved model type uncomment line below
 text_model = tf.saved_model.load("./text")
 
@@ -100,15 +107,21 @@ def predict_image(uploaded_file: UploadFile, response: Response):
         print("Image shape:", image.shape)
         
         # Step 1: (Optional, but you should have one) Do your image preprocessing
+        image = resize_and_convert_to_bw(image, (28,28)) # this is from parameter we created
+        
+        print("processed shape:", image.shape)
+        Image.fromarray(image.squeeze(-1)).save("test.png")
         
         # Step 2: Prepare your data to your model
+        image = np.expand_dims(image, 0) # adding batch dimension
         
         # Step 3: Predict the data
-        # result = model.predict(...)
+        result = vision_model(image).numpy().flatten()
         
         # Step 4: Change the result your determined API output
+        idx_res = np.argmax(result).tolist()
         
-        return "Endpoint not implemented"
+        return idx_res
     except Exception as e:
         traceback.print_exc()
         response.status_code = 500
