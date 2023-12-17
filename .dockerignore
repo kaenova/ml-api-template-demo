@@ -163,3 +163,5 @@ venv
 
 *.h5
 *.zip
+text*
+README.md
