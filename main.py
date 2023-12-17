@@ -38,6 +38,10 @@ import uvicorn
 import traceback
 import tensorflow as tf
 
+# This is what i add to implement the model
+import tensorflow_text
+import numpy as np
+
 from pydantic import BaseModel
 from urllib.request import Request
 from fastapi import FastAPI, Response, UploadFile
@@ -50,7 +54,7 @@ from utils import load_image_into_numpy_array
 # If you use h5 type uncomment line below
 # model = tf.keras.models.load_model('./my_model.h5')
 # If you use saved model type uncomment line below
-# model = tf.saved_model.load("./my_model_folder")
+text_model = tf.saved_model.load("./text")
 
 app = FastAPI()
 
@@ -70,16 +74,11 @@ def predict_text(req: RequestText, response: Response):
         text = req.text
         print("Uploaded text:", text)
         
-        # Step 1: (Optional) Do your text preprocessing
+        model_text_out = text_model([text])
+        model_text_out = model_text_out.numpy().flatten()
+        model_text_out = np.round(model_text_out).tolist()
         
-        # Step 2: Prepare your data to your model
-        
-        # Step 3: Predict the data
-        # result = model.predict(...)
-        
-        # Step 4: Change the result your determined API output
-        
-        return "Endpoint not implemented"
+        return model_text_out[0]
     except Exception as e:
         traceback.print_exc()
         response.status_code = 500
